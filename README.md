@@ -201,22 +201,6 @@ BrainMap-XAI/
 
 ---
 
-## 🚀 Getting Started (Model / Training side)
-
-```bash
-# 1. Clone the repository
-git clone <your-repo-url>
-cd BrainMap-XAI
-
-# 2. Create environment & install dependencies
-pip install torch torchvision albumentations opencv-python numpy scikit-learn matplotlib seaborn
-
-# 3. Run training (Jupyter/Colab)
-# open notebooks/Architecture.ipynb and run cells top-to-bottom
-# enforce_gpu() checks CUDA availability at startup
-
-# 4. Inference / evaluation
-# load best_model.pt and run evaluation with TTA ×5
 ```
 
 ```bash
@@ -243,4 +227,7 @@ python app.py
 
 ## 📄 License / Academic Note
 
-This project was submitted in partial fulfillment of the requirements for the degree of **BS (Information Technology)** at the **Institute of Computing, MNS-University of Agriculture, Multan, Pakistan**. For full technical details, UML diagrams, code listings, and screenshots, see the complete project report (`project_report.docx`).
+This project was submitted in partial fulfillment of the requirements for the degree of **BS (Information Technology)** at the **Institute of Computing, MNS-University of Agriculture, Multan, Pakistan**. For full technical details, UML diagrams, code listings, and screenshots, see the complete project report and slides below.
+
+- 📄 [Full Project Report](reports/project_report.docx)
+- 📊 [Project Slides](reports/slides.pptx)

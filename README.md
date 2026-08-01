@@ -229,5 +229,5 @@ python app.py
 
 This project was submitted in partial fulfillment of the requirements for the degree of **BS (Information Technology)** at the **Institute of Computing, MNS-University of Agriculture, Multan, Pakistan**. For full technical details, UML diagrams, code listings, and screenshots, see the complete project report and slides below.
 
-- 📄 [Full Project Report](reports/project_report.docx)
-- 📊 [Project Slides](reports/slides.pptx)
+- 📄 [Full Project Report](https://docs.google.com/document/d/127SANNZztVKjUyjDaM_FvV42UiXguREh/edit?usp=sharing&ouid=117639944094007826260&rtpof=true&sd=true)
+- 📊 [Project Slides](https://drive.google.com/file/d/174ACBALLqKP3r-Lyu2VqW4qoLC8wjuMm/view?usp=sharing)

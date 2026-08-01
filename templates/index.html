@@ -1,0 +1,179 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}NeuroScan AI — Advanced Parkinson's Dementia Detection{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            AI-Powered Neurological Analysis
+        </div>
+        <h1 class="hero-title">
+            Detect Parkinson's<br>
+            <span class="gradient-text">Dementia Early</span>
+        </h1>
+        <p class="hero-subtitle">
+            Upload brain MRI scans and get instant AI-powered dementia stage analysis 
+            with explainable GradCAM visualizations. Powered by deep learning with 
+            <strong>94%+ accuracy</strong>.
+        </p>
+        <div class="hero-actions">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg pulse-btn">
+                    🧬 Analyze MRI Scan
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-lg">
+                    📊 My Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg pulse-btn">
+                    🚀 Get Started Free
+                </a>
+                <a href="{{ url_for('about') }}" class="btn btn-outline btn-lg">
+                    Learn More
+                </a>
+            {% endif %}
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-value">94.6%</span>
+                <span class="hero-stat-label">Model Accuracy</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">5</span>
+                <span class="hero-stat-label">Dementia Stages</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">{{ stats.total_predictions }}</span>
+                <span class="hero-stat-label">Scans Analyzed</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">{{ stats.total_users }}</span>
+                <span class="hero-stat-label">Users</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Brain Animation -->
+    <div class="hero-visual">
+        <div class="brain-container">
+            <div class="brain-ring ring-1"></div>
+            <div class="brain-ring ring-2"></div>
+            <div class="brain-ring ring-3"></div>
+            <div class="brain-core">
+                <span class="brain-emoji">🧠</span>
+                <div class="scan-line"></div>
+            </div>
+            <div class="brain-dots">
+                <span class="bdot"></span><span class="bdot"></span>
+                <span class="bdot"></span><span class="bdot"></span>
+                <span class="bdot"></span><span class="bdot"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+            <p class="section-subtitle">Three simple steps to get a detailed dementia analysis</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card" data-step="1">
+                <div class="step-number">01</div>
+                <div class="step-icon">📤</div>
+                <h3>Upload MRI Scan</h3>
+                <p>Upload a brain MRI image in PNG, JPG, or TIFF format. Our system accepts standard medical imaging formats.</p>
+            </div>
+            <div class="step-card" data-step="2">
+                <div class="step-number">02</div>
+                <div class="step-icon">🤖</div>
+                <h3>AI Analysis</h3>
+                <p>Our EfficientNet-B3 deep learning model analyzes the scan, trained on thousands of brain MRI images across 5 dementia stages.</p>
+            </div>
+            <div class="step-card" data-step="3">
+                <div class="step-number">03</div>
+                <div class="step-icon">📋</div>
+                <h3>Get Results</h3>
+                <p>Receive a detailed report with confidence scores, GradCAM heatmap visualization, and clinical recommendations.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CLASSIFICATION STAGES ── -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Classification <span class="gradient-text">Stages</span></h2>
+            <p class="section-subtitle">Our model detects five stages of Parkinson's-related dementia</p>
+        </div>
+        <div class="stages-grid">
+            <div class="stage-card" style="--stage-color: #10b981;">
+                <div class="stage-icon">✅</div>
+                <h3>Non Demented</h3>
+                <p>No signs of cognitive decline. Brain function appears normal.</p>
+                <div class="stage-bar" style="width: 0%" data-width="20%"></div>
+            </div>
+            <div class="stage-card" style="--stage-color: #f59e0b;">
+                <div class="stage-icon">⚠️</div>
+                <h3>Very Mild Demented</h3>
+                <p>Minor memory lapses. Daily activities remain largely unaffected.</p>
+                <div class="stage-bar" style="width: 0%" data-width="40%"></div>
+            </div>
+            <div class="stage-card" style="--stage-color: #f97316;">
+                <div class="stage-icon">🔶</div>
+                <h3>Mild Demented</h3>
+                <p>Noticeable memory problems and difficulty with complex tasks.</p>
+                <div class="stage-bar" style="width: 0%" data-width="60%"></div>
+            </div>
+            <div class="stage-card" style="--stage-color: #ef4444;">
+                <div class="stage-icon">🔴</div>
+                <h3>Moderate Demented</h3>
+                <p>Significant memory loss requiring assistance with daily activities.</p>
+                <div class="stage-bar" style="width: 0%" data-width="80%"></div>
+            </div>
+            <div class="stage-card" style="--stage-color: #7c3aed;">
+                <div class="stage-icon">🚨</div>
+                <h3>Severe Demented</h3>
+                <p>Extensive cognitive decline requiring full-time professional care.</p>
+                <div class="stage-bar" style="width: 0%" data-width="100%"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <div class="cta-glow"></div>
+            <h2>Ready to Analyze Your First Scan?</h2>
+            <p>Join researchers and clinicians using NeuroScan AI for dementia detection</p>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">🧬 Start Analysis</a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">🚀 Create Free Account</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

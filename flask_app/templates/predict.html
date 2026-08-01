@@ -1,0 +1,233 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}Analyze MRI — NeuroScan AI{% endblock %}
+
+{% block content %}
+<div class="predict-page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🧬 Analyze Brain MRI Scan</h1>
+            <p class="page-subtitle">Upload a brain MRI image to detect Parkinson's dementia stage with AI</p>
+        </div>
+        {% if model_status %}
+            {% if model_status.loaded %}
+                <div class="model-status-badge model-status-ready">✅ Model Ready</div>
+            {% elif not model_status.torch %}
+                <div class="model-status-badge model-status-warn">⚠️ PyTorch Not Installed</div>
+            {% else %}
+                <div class="model-status-badge model-status-warn">⏳ Model Loading on First Use</div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {# ── PyTorch setup guide banner ── #}
+    {% if model_status and not model_status.torch %}
+    <div class="setup-banner">
+        <div class="setup-banner-inner">
+            <div class="setup-icon">⚙️</div>
+            <div class="setup-text">
+                <h3>PyTorch Installation Required</h3>
+                <p>The AI prediction engine requires PyTorch. Run the command below in your terminal, then restart the app.</p>
+                <div class="setup-cmd">
+                    <code id="torchCmd">pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu</code>
+                    <button class="copy-btn" onclick="copyCmd()">📋 Copy</button>
+                </div>
+                <p class="setup-note">💡 The rest of the app (login, history, dashboard) works fully without PyTorch.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="predict-grid">
+        <!-- Upload Card -->
+        <div class="glass-card upload-card">
+            <form method="POST" action="{{ url_for('predict') }}" enctype="multipart/form-data" id="uploadForm">
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-overlay" id="dropOverlay">
+                        <span class="drop-icon">📂</span>
+                        <p>Drop your MRI scan here</p>
+                    </div>
+                    <div class="drop-content" id="dropContent">
+                        <div class="drop-icon-main">🧠</div>
+                        <h3>Drag & Drop MRI Scan</h3>
+                        <p>or <label for="fileInput" class="file-label">browse files</label></p>
+                        <p class="drop-hint">Supports: PNG, JPG, JPEG, BMP, TIFF · Max 16MB</p>
+                    </div>
+                    <div class="preview-wrapper hidden" id="previewWrapper">
+                        <img id="previewImg" src="" alt="Preview" class="preview-img">
+                        <div class="preview-overlay">
+                            <button type="button" class="preview-remove" onclick="removeFile()">✕ Remove</button>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.bmp,.tiff"
+                           class="file-input" required>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info hidden" id="fileInfo">
+                    <div class="file-info-icon">📄</div>
+                    <div class="file-info-details">
+                        <span id="fileName"></span>
+                        <span id="fileSize" class="text-muted"></span>
+                    </div>
+                    <div class="file-info-badge">Ready ✓</div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="analyzeBtn" disabled>
+                    <span class="btn-text">🤖 Analyze with AI</span>
+                    <span class="btn-loader hidden">
+                        <span class="spinner"></span> Analyzing... Please wait
+                    </span>
+                </button>
+
+                <p class="predict-disclaimer">
+                    ⚕️ Results are for research purposes only. Always consult a qualified physician.
+                </p>
+            </form>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="predict-info-panel">
+            <div class="glass-card info-card">
+                <h3>🤖 About the AI Model</h3>
+                <ul class="info-list">
+                    <li>
+                        <span class="info-icon">⚡</span>
+                        <div>
+                            <strong>Architecture</strong>
+                            <span>EfficientNet-B3 — state-of-the-art convolutional neural network</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="info-icon">🎯</span>
+                        <div>
+                            <strong>Accuracy</strong>
+                            <span>94.6% validation accuracy across 5 dementia stages</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="info-icon">🔬</span>
+                        <div>
+                            <strong>Explainability</strong>
+                            <span>GradCAM heatmaps show which brain regions influenced the decision</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="info-icon">🔒</span>
+                        <div>
+                            <strong>Privacy</strong>
+                            <span>Uploads processed locally — your data is never shared externally</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="glass-card stages-mini-card">
+                <h3>📋 Output Classes</h3>
+                <div class="stages-mini">
+                    <div class="stage-mini" style="--c: #10b981">✅ Non Demented</div>
+                    <div class="stage-mini" style="--c: #f59e0b">⚠️ Very Mild Demented</div>
+                    <div class="stage-mini" style="--c: #f97316">🔶 Mild Demented</div>
+                    <div class="stage-mini" style="--c: #ef4444">🔴 Moderate Demented</div>
+                    <div class="stage-mini" style="--c: #7c3aed">🚨 Severe Demented</div>
+                </div>
+            </div>
+
+            <div class="glass-card tips-card">
+                <h3>💡 Tips for Best Results</h3>
+                <ul class="tips-list">
+                    <li>Use high-resolution brain MRI scans</li>
+                    <li>Ensure the image is clearly a brain scan (axial/coronal view)</li>
+                    <li>Avoid heavily cropped or distorted images</li>
+                    <li>PNG format gives the best quality</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyCmd() {
+    const cmd = document.getElementById('torchCmd')?.innerText;
+    if (cmd) {
+        navigator.clipboard.writeText(cmd).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = '📋 Copy', 2000); }
+        });
+    }
+}
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const fileInfo   = document.getElementById('fileInfo');
+const preview    = document.getElementById('previewWrapper');
+const content    = document.getElementById('dropContent');
+
+function handleFile(file) {
+    if (!file) return;
+    const allowed = ['image/png', 'image/jpeg', 'image/bmp', 'image/tiff'];
+    if (!allowed.includes(file.type) && !file.name.match(/\.(png|jpg|jpeg|bmp|tiff)$/i)) {
+        alert('Please upload a valid image file (PNG, JPG, BMP, TIFF).');
+        return;
+    }
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent  = (file.size / 1024).toFixed(1) + ' KB';
+    fileInfo.classList.remove('hidden');
+    analyzeBtn.disabled = false;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById('previewImg').src = e.target.result;
+        content.classList.add('hidden');
+        preview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeFile() {
+    fileInput.value = '';
+    preview.classList.add('hidden');
+    content.classList.remove('hidden');
+    fileInfo.classList.add('hidden');
+    analyzeBtn.disabled = true;
+}
+
+fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropZone.classList.add('drag-over');
+    document.getElementById('dropOverlay').classList.add('visible');
+}));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropZone.classList.remove('drag-over');
+    document.getElementById('dropOverlay').classList.remove('visible');
+}));
+dropZone.addEventListener('drop', ev => {
+    const file = ev.dataTransfer.files[0];
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    handleFile(file);
+});
+
+document.getElementById('uploadForm').addEventListener('submit', function() {
+    document.querySelector('.btn-text').classList.add('hidden');
+    document.querySelector('.btn-loader').classList.remove('hidden');
+    analyzeBtn.disabled = true;
+});
+</script>
+{% endblock %}

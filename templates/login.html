@@ -1,0 +1,86 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}Login — NeuroScan AI{% endblock %}
+{% block content %}
+
+<div class="auth-page">
+    <div class="auth-visual">
+        <div class="auth-brain-anim">
+            <div class="brain-ring ring-1"></div>
+            <div class="brain-ring ring-2"></div>
+            <div class="brain-core">
+                <span class="brain-emoji">🧠</span>
+                <div class="scan-line"></div>
+            </div>
+        </div>
+        <h2 class="auth-visual-title">Welcome Back</h2>
+        <p class="auth-visual-sub">Access your diagnostic history and analyze new brain scans with AI</p>
+        <div class="auth-features">
+            <div class="auth-feature"><span>✅</span> 94.6% Detection Accuracy</div>
+            <div class="auth-feature"><span>🔬</span> GradCAM Explainability</div>
+            <div class="auth-feature"><span>📊</span> Full Prediction History</div>
+        </div>
+    </div>
+
+    <div class="auth-form-side">
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <div class="auth-logo">🧠</div>
+                <h1 class="auth-title">Sign In</h1>
+                <p class="auth-subtitle">Enter your credentials to continue</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}" class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="email" name="email" class="form-input"
+                            placeholder="doctor.ASU@hospital.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" name="password" class="form-input"
+                            placeholder="Your password" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">
+                    <span class="btn-text">Sign In →</span>
+                    <span class="btn-loader hidden">Signing in...</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{{ url_for('register') }}" class="auth-link">Create one free</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function togglePassword(id) {
+        const inp = document.getElementById(id);
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+    document.getElementById('loginForm').addEventListener('submit', function () {
+        document.querySelector('.btn-text').classList.add('hidden');
+        document.querySelector('.btn-loader').classList.remove('hidden');
+    });
+</script>
+{% endblock %}

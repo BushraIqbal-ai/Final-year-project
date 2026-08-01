@@ -1,0 +1,134 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="NeuroScan AI — Advanced Parkinson's Disease Dementia Detection using Deep Learning and Brain MRI Analysis">
+    <title>{% block title %}NeuroScan AI — Parkinson's Dementia Detection{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ── Particle background ── -->
+    <div class="particles" id="particles"></div>
+
+    <!-- ── Navigation ── -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <div class="brand-icon">🧠</div>
+                <span class="brand-text">NeuroScan <span class="brand-ai">AI</span></span>
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a href="{{ url_for('index') }}"
+                    class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                <a href="{{ url_for('about') }}"
+                    class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">About</a>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('dashboard') }}"
+                    class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('predict') }}"
+                    class="nav-link {% if request.endpoint == 'predict' %}active{% endif %}">Analyze</a>
+                <a href="{{ url_for('history') }}"
+                    class="nav-link {% if request.endpoint == 'history' %}active{% endif %}">History</a>
+                <div class="nav-user">
+                    <div class="user-avatar">{{ session.get('user_name', 'U')[0].upper() }}</div>
+                    <span class="user-name">{{ session.get('user_name', '').split()[0] }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Logout</a>
+                </div>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Get Started</a>
+                {% endif %}
+                
+                <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Mode">
+                    <span class="theme-icon">🌞</span>
+                </button>
+            </div>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ── -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" id="flashContainer">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}" role="alert">
+            <span class="flash-icon">
+                {% if category == 'success' %}✅{% elif category == 'error' %}❌{% elif category == 'warning' %}⚠️{% else
+                %}ℹ️{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ── -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="brand-icon">🧠</div>
+                <span class="brand-text">NeuroScan <span class="brand-ai">AI</span></span>
+            </div>
+            <p class="footer-tagline">Empowering early detection through artificial intelligence</p>
+            <div class="footer-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('about') }}">About</a>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('predict') }}">Analyze</a>
+                <a href="{{ url_for('history') }}">History</a>
+                {% endif %}
+            </div>
+            <p class="footer-disclaimer">⚕️ For research and educational purposes only. Not a substitute for
+                professional medical diagnosis.</p>
+            <p class="footer-copy">&copy; 2026 NeuroScan AI — Parkinson's Dementia Detection System</p>
+        </div>
+    </footer>
+
+    <!-- ── Scripts ── -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

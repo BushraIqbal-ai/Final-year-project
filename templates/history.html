@@ -1,0 +1,139 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}History — NeuroScan AI{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📋 Analysis History</h1>
+            <p class="page-subtitle">All your past brain MRI analyses — {{ predictions | length }} total</p>
+        </div>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary">🧬 New Analysis</a>
+    </div>
+
+    {% if predictions %}
+    <!-- ── Filter Row ── -->
+    <div class="filter-row">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by diagnosis..." class="search-input">
+        </div>
+        <div class="filter-chips" id="filterChips">
+            <button class="chip chip-active" onclick="filterChip(this, 'all')">All</button>
+            <button class="chip" onclick="filterChip(this, 'Non Demented')" style="--cc: #10b981">✅ Non</button>
+            <button class="chip" onclick="filterChip(this, 'Very Mild')" style="--cc: #f59e0b">⚠️ Very Mild</button>
+            <button class="chip" onclick="filterChip(this, 'Mild Demented')" style="--cc: #f97316">🔶 Mild</button>
+            <button class="chip" onclick="filterChip(this, 'Moderate')" style="--cc: #ef4444">🔴 Moderate</button>
+            <button class="chip" onclick="filterChip(this, 'Severe')" style="--cc: #7c3aed">🚨 Severe</button>
+        </div>
+    </div>
+
+    <!-- ── Table ── -->
+    <div class="glass-card table-card">
+        <div class="table-wrapper">
+            <table class="data-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>MRI Preview</th>
+                        <th>Diagnosis</th>
+                        <th>Confidence</th>
+                        <th>Date & Time</th>
+                        <th>GradCAM</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pred in predictions %}
+                    <tr class="table-row" data-class="{{ pred.predicted_class }}">
+                        <td class="td-id">#{{ pred.id }}</td>
+                        <td class="td-thumb">
+                            <div class="thumb-wrap">
+                                <img src="{{ url_for('static', filename='uploads/' + pred.image_filename) }}"
+                                     alt="MRI" class="table-thumb"
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 60%22><text y=%221em%22 font-size=%2250%22>🧠</text></svg>'">
+                            </div>
+                        </td>
+                        <td class="td-class">
+                            <span class="class-badge" style="color: {{ pred.class_color }}; background: {{ pred.class_color }}18; border: 1px solid {{ pred.class_color }}44">
+                                {{ pred.predicted_class }}
+                            </span>
+                        </td>
+                        <td class="td-conf">
+                            <div class="mini-conf">
+                                <div class="mini-bar-track">
+                                    <div class="mini-bar-fill"
+                                         style="width: {{ (pred.confidence * 100) | round(1) }}%; background: {{ pred.class_color }}">
+                                    </div>
+                                </div>
+                                <span>{{ (pred.confidence * 100) | round(1) }}%</span>
+                            </div>
+                        </td>
+                        <td class="td-time">
+                            <span class="time-badge">{{ pred.timestamp[:16].replace('T', ' ') }}</span>
+                        </td>
+                        <td class="td-gradcam">
+                            {% if pred.gradcam_filename %}
+                            <a href="{{ url_for('static', filename='results/' + pred.gradcam_filename) }}"
+                               target="_blank" class="btn btn-outline btn-xs">View 🔥</a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="td-actions">
+                            <a href="{{ url_for('result', pred_id=pred.id) }}" class="btn btn-primary btn-xs">Details</a>
+                            <form method="POST" action="{{ url_for('delete_pred', pred_id=pred.id) }}"
+                                  onsubmit="return confirm('Delete this prediction? This cannot be undone.');"
+                                  style="display:inline">
+                                <button type="submit" class="btn btn-danger btn-xs">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ── Empty State ── -->
+    <div class="empty-state">
+        <div class="empty-brain">🧠</div>
+        <h2>No analyses yet</h2>
+        <p>Upload your first brain MRI scan to get started with AI-powered dementia detection.</p>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg pulse-btn">🧬 Analyze First Scan</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Search filter
+document.getElementById('searchInput')?.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.table-row').forEach(row => {
+        const cls = row.dataset.class.toLowerCase();
+        row.style.display = cls.includes(q) ? '' : 'none';
+    });
+});
+
+// Chip filter
+function filterChip(btn, cls) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
+    btn.classList.add('chip-active');
+    document.querySelectorAll('.table-row').forEach(row => {
+        if (cls === 'all') { row.style.display = ''; return; }
+        row.style.display = row.dataset.class.includes(cls) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

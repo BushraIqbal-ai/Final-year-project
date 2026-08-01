@@ -1,0 +1,218 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}Result — {{ pred.predicted_class }} — NeuroScan AI{% endblock %}
+
+{% block content %}
+<div class="result-page">
+
+    <!-- ── Result Header ── -->
+    <div class="result-header" style="--rc: {{ pred.class_color }}">
+        <div class="result-badge-ring">
+            <div class="result-badge-inner">
+                <span class="result-emoji">{{ pred.class_info.get('icon', '🧠') }}</span>
+            </div>
+        </div>
+        <div class="result-header-text">
+            <p class="result-label">AI Diagnosis Result</p>
+            <h1 class="result-class" style="color: {{ pred.class_color }}">{{ pred.predicted_class }}</h1>
+            <div class="result-confidence-pill" style="background: {{ pred.class_color }}22; border: 1px solid {{ pred.class_color }}66;">
+                Confidence: <strong style="color: {{ pred.class_color }}">{{ (pred.confidence * 100) | round(1) }}%</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Main Result Grid ── -->
+    <div class="result-grid">
+
+        <!-- MRI Image + GradCAM -->
+        <div class="glass-card scan-card">
+            <div class="card-header">
+                <h2>🖼️ Scan Analysis</h2>
+            </div>
+            <div class="scan-tabs">
+                <button class="scan-tab active" onclick="showScan('original')">Original MRI</button>
+                {% if pred.gradcam_filename %}
+                <button class="scan-tab" onclick="showScan('gradcam')">GradCAM Heatmap</button>
+                {% endif %}
+            </div>
+            <div class="scan-images">
+                <div class="scan-img-wrap active" id="scanOriginal">
+                    <img src="{{ url_for('static', filename='uploads/' + pred.image_filename) }}"
+                         alt="Original MRI Scan" class="scan-image"
+                         onerror="this.alt='Image not available'; this.style.display='none'">
+                    <p class="scan-caption">Original brain MRI scan</p>
+                </div>
+                {% if pred.gradcam_filename %}
+                <div class="scan-img-wrap" id="scanGradcam">
+                    <img src="{{ url_for('static', filename='results/' + pred.gradcam_filename) }}"
+                         alt="GradCAM Heatmap" class="scan-image">
+                    <p class="scan-caption">🔥 GradCAM — regions influencing the AI's decision</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Confidence Breakdown -->
+        <div class="glass-card confidence-card">
+            <div class="card-header">
+                <h2>📊 Confidence Breakdown</h2>
+            </div>
+            <div class="confidence-bars">
+                {% set colors = {
+                    'Non Demented': '#10b981',
+                    'Very Mild Demented': '#f59e0b',
+                    'Mild Demented': '#f97316',
+                    'Moderate Demented': '#ef4444',
+                    'Severe Demented': '#7c3aed'
+                } %}
+                {% for cls, prob in pred.all_probs.items() | sort(attribute=1, reverse=True) %}
+                <div class="conf-row {% if cls == pred.predicted_class %}conf-row-active{% endif %}">
+                    <div class="conf-header">
+                        <span class="conf-class">{{ cls }}</span>
+                        <span class="conf-pct" style="color: {{ colors.get(cls, '#64748b') }}">{{ prob }}%</span>
+                    </div>
+                    <div class="conf-bar-track">
+                        <div class="conf-bar-fill"
+                             style="--target-width: {{ prob }}%; background: {{ colors.get(cls, '#64748b') }};"
+                             data-width="{{ prob }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <canvas id="confidenceChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- ── Clinical Info ── -->
+    {% if pred.class_info %}
+    <div class="glass-card clinical-card">
+        <div class="clinical-header" style="border-left: 4px solid {{ pred.class_color }}">
+            <div>
+                <h2>🏥 Clinical Assessment</h2>
+                <p class="clinical-stage" style="color: {{ pred.class_color }}">{{ pred.predicted_class }}</p>
+            </div>
+            <div class="clinical-badge" style="background: {{ pred.class_color }}22; color: {{ pred.class_color }}">
+                {{ (pred.confidence * 100) | round(1) }}% confident
+            </div>
+        </div>
+        <p class="clinical-desc">{{ pred.class_info.get('description', '') }}</p>
+
+        {% if pred.class_info.get('recommendations') %}
+        <div class="recommendations">
+            <h3>📋 Recommendations</h3>
+            <ul class="rec-list">
+                {% for rec in pred.class_info.recommendations %}
+                <li class="rec-item">
+                    <span class="rec-dot" style="background: {{ pred.class_color }}"></span>
+                    {{ rec }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="disclaimer-box">
+            ⚕️ <strong>Medical Disclaimer:</strong> This AI analysis is for research and educational purposes only.
+            Please consult a certified neurologist or medical professional for clinical diagnosis and treatment.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Meta Info + Actions ── -->
+    <div class="result-actions-row">
+        <div class="glass-card meta-card">
+            <h3>📎 Scan Details</h3>
+            <div class="meta-list">
+                <div class="meta-row"><span>Scan ID</span><strong>#{{ pred.id }}</strong></div>
+                <div class="meta-row"><span>Analyzed</span><strong>{{ pred.timestamp[:16] }}</strong></div>
+                <div class="meta-row"><span>Model</span><strong>EfficientNet-B3</strong></div>
+                <div class="meta-row"><span>Classes</span><strong>5-stage dementia</strong></div>
+            </div>
+        </div>
+        <div class="result-actions">
+            <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">🧬 Analyze Another</a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline btn-lg">📋 View History</a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-lg">📊 Dashboard</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Tab switching
+function showScan(type) {
+    document.querySelectorAll('.scan-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.scan-img-wrap').forEach(w => w.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('scan' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+}
+
+// Animate confidence bars
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.querySelectorAll('.conf-bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.width;
+        });
+    }, 300);
+});
+
+// Polar chart
+const allProbs = {{ pred.all_probs | tojson }};
+const colorMap = {
+    'Non Demented': '#10b981',
+    'Very Mild Demented': '#f59e0b',
+    'Mild Demented': '#f97316',
+    'Moderate Demented': '#ef4444',
+    'Severe Demented': '#7c3aed'
+};
+const ctx = document.getElementById('confidenceChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: Object.keys(allProbs),
+        datasets: [{
+            label: 'Confidence (%)',
+            data: Object.values(allProbs),
+            backgroundColor: Object.keys(allProbs).map(k => (colorMap[k] || '#64748b') + 'aa'),
+            borderColor: Object.keys(allProbs).map(k => colorMap[k] || '#64748b'),
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#e2e8f0',
+                bodyColor: '#94a3b8',
+                callbacks: { label: c => ` ${c.parsed.y.toFixed(2)}%` }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#94a3b8', font: { size: 11 } },
+                grid: { color: '#1e293b' }
+            },
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { color: '#94a3b8', callback: v => v + '%' },
+                grid: { color: '#1e293b55' }
+            }
+        },
+        animation: { duration: 1000 }
+    }
+});
+</script>
+{% endblock %}

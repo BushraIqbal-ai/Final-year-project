@@ -1,0 +1,217 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}Dashboard — NeuroScan AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+    <!-- ── Welcome Banner ── -->
+    <div class="dash-welcome">
+        <div class="dash-welcome-text">
+            <h1>Welcome back, <span class="gradient-text">{{ session.get('user_name', '').split()[0] }}</span> 👋</h1>
+            <p>Here's your neurological analysis overview</p>
+        </div>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary pulse-btn">🧬 New Analysis</a>
+    </div>
+
+    <!-- ── KPI Cards ── -->
+    <div class="kpi-grid">
+        <div class="kpi-card" style="--kpi-color: #06b6d4;">
+            <div class="kpi-icon">🔬</div>
+            <div class="kpi-info">
+                <span class="kpi-value counter" data-target="{{ stats.total }}">0</span>
+                <span class="kpi-label">Total Scans</span>
+            </div>
+            <div class="kpi-glow"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color: #10b981;">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-info">
+                <span class="kpi-value">{{ stats.avg_confidence }}%</span>
+                <span class="kpi-label">Avg Confidence</span>
+            </div>
+            <div class="kpi-glow"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color: #f59e0b;">
+            <div class="kpi-icon">🏆</div>
+            <div class="kpi-info">
+                <span class="kpi-value">
+                    {% if stats.class_distribution %}
+                        {{ stats.class_distribution[0].predicted_class.split()[0] }}
+                    {% else %}—{% endif %}
+                </span>
+                <span class="kpi-label">Top Diagnosis</span>
+            </div>
+            <div class="kpi-glow"></div>
+        </div>
+        <div class="kpi-card" style="--kpi-color: #a855f7;">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-info">
+                <span class="kpi-value">EfficientNet</span>
+                <span class="kpi-label">AI Model</span>
+            </div>
+            <div class="kpi-glow"></div>
+        </div>
+    </div>
+
+    <!-- ── Main Dashboard Grid ── -->
+    <div class="dash-grid">
+
+        <!-- Distribution Chart -->
+        <div class="glass-card chart-card">
+            <div class="card-header">
+                <h2>🍩 Diagnosis Distribution</h2>
+            </div>
+            {% if stats.class_distribution %}
+            <div class="chart-wrapper">
+                <canvas id="distChart" width="300" height="300"></canvas>
+            </div>
+            <div class="chart-legend" id="chartLegend"></div>
+            {% else %}
+            <div class="empty-state-inline">
+                <p>No scans yet. <a href="{{ url_for('predict') }}">Analyze your first MRI →</a></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Predictions -->
+        <div class="glass-card recent-card">
+            <div class="card-header">
+                <h2>🕐 Recent Analyses</h2>
+                <a href="{{ url_for('history') }}" class="card-action">View All →</a>
+            </div>
+            {% if recent_preds %}
+            <div class="recent-list">
+                {% for pred in recent_preds %}
+                <div class="recent-item">
+                    <div class="recent-thumb">
+                        {% if pred.image_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + pred.image_filename) }}"
+                             alt="MRI Scan" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🧠</text></svg>'">
+                        {% else %}
+                        <span>🧠</span>
+                        {% endif %}
+                    </div>
+                    <div class="recent-info">
+                        <span class="recent-class" style="color: {{ pred.class_color }}">
+                            {{ pred.predicted_class }}
+                        </span>
+                        <span class="recent-conf">{{ (pred.confidence * 100) | round(1) }}% confidence</span>
+                        <span class="recent-time">{{ pred.timestamp[:16] }}</span>
+                    </div>
+                    <a href="{{ url_for('result', pred_id=pred.id) }}" class="btn btn-outline btn-xs">View</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state-inline">
+                <span class="empty-icon">🔬</span>
+                <p>No analyses yet.</p>
+                <a href="{{ url_for('predict') }}" class="btn btn-primary btn-sm">Start First Analysis</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- ── Quick Actions ── -->
+    <div class="quick-actions">
+        <h2 class="section-label">Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{{ url_for('predict') }}" class="action-card">
+                <span class="action-icon">🧬</span>
+                <span class="action-label">New Analysis</span>
+            </a>
+            <a href="{{ url_for('history') }}" class="action-card">
+                <span class="action-icon">📋</span>
+                <span class="action-label">View History</span>
+            </a>
+            <a href="{{ url_for('about') }}" class="action-card">
+                <span class="action-icon">ℹ️</span>
+                <span class="action-label">Learn More</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="action-card action-card-danger">
+                <span class="action-icon">🚪</span>
+                <span class="action-label">Logout</span>
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Animate KPI counters
+document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target) || 0;
+    let current = 0;
+    const step = Math.max(1, Math.round(target / 40));
+    const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current;
+        if (current >= target) clearInterval(timer);
+    }, 40);
+});
+
+// Chart
+{% if stats.class_distribution %}
+const classColors = {{ class_colors | tojson }};
+const labels = {{ stats.class_distribution | map(attribute='predicted_class') | list | tojson }};
+const counts = {{ stats.class_distribution | map(attribute='count') | list | tojson }};
+const colors = labels.map(l => classColors[l] || '#64748b');
+
+const ctx = document.getElementById('distChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: labels,
+        datasets: [{
+            data: counts,
+            backgroundColor: colors.map(c => c + 'cc'),
+            borderColor: colors,
+            borderWidth: 2,
+            hoverOffset: 12
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                titleColor: '#e2e8f0',
+                bodyColor: '#94a3b8',
+                borderColor: '#334155',
+                borderWidth: 1,
+                callbacks: {
+                    label: ctx => ` ${ctx.parsed} scan${ctx.parsed !== 1 ? 's' : ''} (${Math.round(ctx.parsed / counts.reduce((a,b)=>a+b,0) * 100)}%)`
+                }
+            }
+        },
+        animation: { animateRotate: true, duration: 1200 }
+    }
+});
+
+// Custom Legend
+const legend = document.getElementById('chartLegend');
+labels.forEach((lbl, i) => {
+    legend.innerHTML += `
+        <div class="legend-item">
+            <span class="legend-dot" style="background:${colors[i]}"></span>
+            <span>${lbl}</span>
+            <strong>${counts[i]}</strong>
+        </div>`;
+});
+{% endif %}
+</script>
+{% endblock %}

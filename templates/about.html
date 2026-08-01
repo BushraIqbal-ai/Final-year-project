@@ -1,0 +1,193 @@
+<!--
+==============================================================================
+Copyright (c) 2026 Dr ASU. All Rights Reserved.
+Project: Parkinson's Disease Dementia Detection System
+Developer: Dr ASU
+==============================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}About — NeuroScan AI{% endblock %}
+
+{% block content %}
+<div class="about-page">
+
+    <div class="page-hero">
+        <h1 class="page-title">About <span class="gradient-text">NeuroScan AI</span></h1>
+        <p class="page-subtitle">Advancing neurological research with explainable artificial intelligence</p>
+    </div>
+
+    <!-- ── Mission ── -->
+    <section class="section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>🎯 Our Mission</h2>
+                    <p>
+                        Parkinson's disease-related dementia affects millions worldwide, yet early detection remains
+                        a significant clinical challenge. NeuroScan AI leverages state-of-the-art deep learning to
+                        assist medical researchers and clinicians in identifying dementia stages from brain MRI scans
+                        with high accuracy and full explainability.
+                    </p>
+                    <p>
+                        This project was developed as a Final Year Project focused on applying AI to healthcare,
+                        combining rigorous machine learning research with a user-friendly clinical interface.
+                    </p>
+                </div>
+                <div class="about-stats-panel">
+                    <div class="about-stat-card">
+                        <span class="about-stat-val">94.6%</span>
+                        <span>Validation Accuracy</span>
+                    </div>
+                    <div class="about-stat-card">
+                        <span class="about-stat-val">5</span>
+                        <span>Dementia Stages</span>
+                    </div>
+                    <div class="about-stat-card">
+                        <span class="about-stat-val">EfficientNet-B3</span>
+                        <span>AI Architecture</span>
+                    </div>
+                    <div class="about-stat-card">
+                        <span class="about-stat-val">GradCAM</span>
+                        <span>Explainability</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Model Details ── -->
+    <section class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🤖 The <span class="gradient-text">AI Model</span></h2>
+            </div>
+            <div class="model-details-grid">
+                <div class="glass-card model-card">
+                    <div class="model-icon">🏗️</div>
+                    <h3>Architecture</h3>
+                    <p><strong>EfficientNet-B3</strong> — A highly efficient convolutional neural network designed using neural architecture search. Fine-tuned on the Parkinson's Disease dementia dataset with custom classification head.</p>
+                </div>
+                <div class="glass-card model-card">
+                    <div class="model-icon">📊</div>
+                    <h3>Dataset</h3>
+                    <p>Trained on a comprehensive dataset of brain MRI scans spanning 5 dementia stages with data augmentation techniques including rotation, flipping, color jitter, and random cropping to improve generalization.</p>
+                </div>
+                <div class="glass-card model-card">
+                    <div class="model-icon">🔬</div>
+                    <h3>GradCAM Explainability</h3>
+                    <p><strong>Gradient-weighted Class Activation Mapping</strong> generates visual heatmaps showing which brain regions most influenced the model's classification decision — critical for clinical trust.</p>
+                </div>
+                <div class="glass-card model-card">
+                    <div class="model-icon">⚡</div>
+                    <h3>Performance</h3>
+                    <p>Achieved <strong>94.6% validation accuracy</strong> after 100+ training epochs with cosine annealing learning rate scheduling and early stopping to prevent overfitting.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Dementia Stages ── -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🧠 Parkinson's Dementia <span class="gradient-text">Stages</span></h2>
+                <p class="section-subtitle">Understanding the five classifications our model detects</p>
+            </div>
+            <div class="stages-detailed">
+                {% set stages = [
+                    ('Non Demented', '#10b981', '✅', 'No signs of cognitive decline. Brain structure and function appear normal with no significant neurological markers of dementia.'),
+                    ('Very Mild Demented', '#f59e0b', '⚠️', 'Very subtle cognitive impairment. Minor memory lapses may occur but do not significantly affect daily life or independence.'),
+                    ('Mild Demented', '#f97316', '🔶', 'Noticeable memory problems and difficulty with complex tasks. Some assistance may be needed but the individual remains largely independent.'),
+                    ('Moderate Demented', '#ef4444', '🔴', 'Significant cognitive decline with substantial memory loss. Daily activities require assistance and behavioral changes may occur.'),
+                    ('Severe Demented', '#7c3aed', '🚨', 'Profound cognitive decline. Loss of ability to communicate verbally and perform basic functions. Full-time professional care is required.')
+                ] %}
+                {% for name, color, icon, desc in stages %}
+                <div class="stage-detail-card">
+                    <div class="stage-detail-icon" style="background: {{ color }}22; border: 2px solid {{ color }}55">{{ icon }}</div>
+                    <div class="stage-detail-body">
+                        <h3 style="color: {{ color }}">{{ name }}</h3>
+                        <p>{{ desc }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Training Metrics ── -->
+    <section class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">📈 Training <span class="gradient-text">Results</span></h2>
+            </div>
+            <div class="metrics-grid">
+                <div class="glass-card metric-highlight">
+                    <h3>Model Performance</h3>
+                    <div class="metrics-bars">
+                        <div class="metric-bar-row">
+                            <span>Train Accuracy</span>
+                            <div class="metric-track">
+                                <div class="metric-fill" style="width:0;--tw:98.7%;background:#06b6d4" data-w="98.7%"></div>
+                            </div>
+                            <strong>98.7%</strong>
+                        </div>
+                        <div class="metric-bar-row">
+                            <span>Val Accuracy</span>
+                            <div class="metric-track">
+                                <div class="metric-fill" style="width:0;--tw:94.6%;background:#10b981" data-w="94.6%"></div>
+                            </div>
+                            <strong>94.6%</strong>
+                        </div>
+                        <div class="metric-bar-row">
+                            <span>Val Loss</span>
+                            <div class="metric-track">
+                                <div class="metric-fill" style="width:0;--tw:19%;background:#f59e0b" data-w="19%"></div>
+                            </div>
+                            <strong>~0.19</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card training-info-card">
+                    <h3>Training Configuration</h3>
+                    <ul class="training-list">
+                        <li><span>Optimizer</span><strong>AdamW</strong></li>
+                        <li><span>Scheduler</span><strong>Cosine Annealing</strong></li>
+                        <li><span>Epochs</span><strong>100+</strong></li>
+                        <li><span>Image Size</span><strong>224 × 224</strong></li>
+                        <li><span>Augmentation</span><strong>Yes (5 transforms)</strong></li>
+                        <li><span>Framework</span><strong>PyTorch</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Disclaimer ── -->
+    <section class="section">
+        <div class="container">
+            <div class="disclaimer-full-card">
+                <h3>⚕️ Medical Disclaimer</h3>
+                <p>NeuroScan AI is developed for <strong>research and educational purposes only</strong>. It is not a certified medical device and should not be used as a substitute for professional clinical diagnosis. All predictions should be reviewed and interpreted by a qualified neurologist or medical professional. The developers accept no liability for clinical decisions made based on this system.</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Animate metric bars on scroll
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.querySelectorAll('.metric-fill').forEach(bar => {
+                bar.style.width = bar.dataset.w;
+            });
+        }
+    });
+}, { threshold: 0.3 });
+document.querySelectorAll('.metric-highlight').forEach(el => observer.observe(el));
+</script>
+{% endblock %}
